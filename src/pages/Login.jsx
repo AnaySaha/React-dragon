@@ -1,10 +1,14 @@
-import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../Provider/AuthProvider";
 
 
 const Login = () => {
-  const {userLogin, setUser}= useContext(AuthContext)
+  const {userLogin, setUser}= useContext(AuthContext);
+  const [error, setError] = useState({});
+  const location= useLocation();
+  const navigate = useNavigate();
+  console.log(location);
   const handleSubmit =(e)=>{
     e.preventDefault();
     const form = e.target;
@@ -15,10 +19,11 @@ const Login = () => {
     .then(result=>{
       const user = result.user;
       setUser(user);
+      navigate(location?.state ? location.state : "/");
     })
 
-    .catch((error) => {
-      alert(error.code);
+    .catch((err) => {
+      setError({ ...error, login: err.code });
     });
   };
     return (
@@ -37,6 +42,15 @@ const Login = () => {
             <span className="label-text">Password</span>
           </label>
           <input name="password" type="password" placeholder="password" className="input input-bordered" required />
+          
+        {
+          error.login && (
+            <label className="label text-sm text-red-600">
+              {error.login}
+            </label>
+          )
+        }
+
           <label className="label">
             <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
           </label>
@@ -46,7 +60,7 @@ const Login = () => {
         </div>
       </form>
       <p className="text-center font-semibold">
-        Don't Have an Account? <Link className="text-red-500" to="/auth/register">Register</Link>
+        Do not Have an Account? <Link className="text-red-500" to="/auth/register">Register</Link>
       </p>
     </div>
         </div>

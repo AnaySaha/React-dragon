@@ -1,17 +1,25 @@
-import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../Provider/AuthProvider";
 
 
 const Register = () => {
 
-const { createNewUser, user, setUser } = useContext(AuthContext);
+const { createNewUser, setUser, updateUserProfile } = 
+useContext(AuthContext);
+const navigate = useNavigate();
+const [error, setError] = useState({});
 
   const handleSubmit = (e)=> {
     e.preventDefault();
     //get from data
     const form = new FormData(e.target);
     const name = form.get("name");
+    const photo = form.get("photo");
+    if (name.length <5) {
+      setError({ ...error, name: "Must be more then 5 Charecter long"});
+      return;
+    }
     const email = form.get("email");
     const password = form.get("password");
     console.log({ name, email, password });
@@ -20,7 +28,13 @@ const { createNewUser, user, setUser } = useContext(AuthContext);
     .then((result) => {
       const user = result.user;
       setUser(user);
-      console.log(user);
+      updateUserProfile({displayName: name, photoURL: photo }).then(
+        () => {
+          navigate("/");
+        }).catch(err=>{
+          console.log(err);
+        });
+
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -41,7 +55,21 @@ const { createNewUser, user, setUser } = useContext(AuthContext);
      </label>
      <input name="name" type="text" placeholder="name" className="input input-bordered" required />
    </div>
+   {
+          error.name && (
+            <label className="label text-xs text-red-600">
+              {error.name}
+            </label>
+          )
+        }
 
+<div className="form-control">
+     <label className="label">
+       <span className="label-text">Photo URL</span>
+     </label>
+     <input name= "photo" type="text" placeholder="photo-url" 
+     className="input input-bordered" required />
+   </div>
    <div className="form-control">
      <label className="label">
        <span className="label-text">Email</span>
